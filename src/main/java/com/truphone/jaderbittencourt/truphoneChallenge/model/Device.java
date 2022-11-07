@@ -1,18 +1,17 @@
-package com.truphone.jaderbittencourt.truphoneChallenge.dto;
+package com.truphone.jaderbittencourt.truphoneChallenge.model;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @Document("devices")
 public class Device {
-    @Id
-    private long id;
+    
+    private String _id;
     private String name;
     private String brand;
-    private Timestamp creationTime;
+    private LocalDateTime creationTime;
     private boolean deleted;
 }
