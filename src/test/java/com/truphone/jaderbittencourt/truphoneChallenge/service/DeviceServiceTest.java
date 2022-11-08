@@ -2,6 +2,7 @@ package com.truphone.jaderbittencourt.truphoneChallenge.service;
 
 import com.truphone.jaderbittencourt.truphoneChallenge.dto.DeviceDto;
 import com.truphone.jaderbittencourt.truphoneChallenge.dto.PatchDeviceDto;
+import com.truphone.jaderbittencourt.truphoneChallenge.exception.InvalidHexadecimalException;
 import com.truphone.jaderbittencourt.truphoneChallenge.mapper.PatchDeviceDtoToDeviceConverter;
 import com.truphone.jaderbittencourt.truphoneChallenge.model.Device;
 import com.truphone.jaderbittencourt.truphoneChallenge.repository.DeviceRepository;
@@ -26,16 +27,16 @@ import static org.mockito.ArgumentMatchers.eq;
 
 @SpringBootTest
 public class DeviceServiceTest {
-    
+
     @Mock
     DeviceRepository deviceRepository;
     @InjectMocks
     DeviceService deviceService;
-    
+
     private static final String DEVICE_ID = "636936e6554d80283ebff3b2";
     private static final String DEVICE_ID2 = "636936e8554d80283ebff3b3";
     private static final String BRAND = "brand";
-    
+
     @BeforeEach
     public void setUp() {
         deviceService.mapper = modelMapper();
@@ -51,7 +52,7 @@ public class DeviceServiceTest {
         assertNotNull(device);
         assertTrue(deviceService.getDeviceById(DEVICE_ID2).isEmpty());
     }
-    
+
     @Test
     public void testGedDeviceByBrand() {
         Mockito.when(deviceRepository.findActiveDeviceByBrand(eq(BRAND)))
@@ -64,7 +65,7 @@ public class DeviceServiceTest {
         devices = deviceService.gedDeviceByBrand("garlic");
         assertTrue(devices.isEmpty());
     }
-    
+
     @Test
     public void testListDevices() {
         Mockito.when(deviceRepository.findActiveDevices())
@@ -80,14 +81,14 @@ public class DeviceServiceTest {
         devices = deviceService.gedDeviceByBrand("garlic");
         assertTrue(devices.isEmpty());
     }
-    
+
     @Test
     public void testCreateDevice() {
         DeviceDto deviceDto = newDeviceDto();
-        
+
         Mockito.when(deviceRepository.save(any()))
                 .thenReturn(mockDevice(deviceDto.getName(), deviceDto.getBrand()));
-        
+
         Device device = deviceService.createDevice(deviceDto);
         assertNotNull(device);
         assertEquals(device.getName(), deviceDto.getName());
@@ -104,7 +105,7 @@ public class DeviceServiceTest {
                 .thenReturn(Optional.of(mockDevice("oldName", "oldBrand")));
         Mockito.when(deviceRepository.save(any()))
                 .thenReturn(mockDevice(deviceDto.getName(), deviceDto.getBrand()));
-                
+
         Device device = deviceService.updateDevice(deviceDto, DEVICE_ID).get();
         assertNotNull(device);
         assertEquals(device.getName(), deviceDto.getName());
@@ -117,7 +118,7 @@ public class DeviceServiceTest {
     public void testPatchDeviceName() {
         PatchDeviceDto patchDeviceDto = new PatchDeviceDto();
         patchDeviceDto.setName("garlic");
-        
+
         Mockito.when(deviceRepository.findActiveDeviceById(eq(new ObjectId(DEVICE_ID))))
                 .thenReturn(Optional.of(mockDevice("oldName", "oldBrand")));
         Mockito.when(deviceRepository.save(any()))
@@ -159,6 +160,38 @@ public class DeviceServiceTest {
                 .thenReturn(Optional.empty());
         assertFalse(deviceService.deleteDevice(DEVICE_ID2));
     }
+
+    @Test
+    public void testGetDeviceByIdWithInvalidHexadecimal() {
+        Exception exception = assertThrows(InvalidHexadecimalException.class, () -> {
+            deviceService.getDeviceById("x");
+        });
+        assertNotNull(exception);
+    }
+    
+    @Test
+    public void testUpdateDeviceByIdWithInvalidHexadecimal() {
+        Exception exception = assertThrows(InvalidHexadecimalException.class, () -> {
+            deviceService.updateDevice(null, "x");
+        });
+        assertNotNull(exception);
+    }
+
+    @Test
+    public void testPatchDeviceByIdWithInvalidHexadecimal() {
+        Exception exception = assertThrows(InvalidHexadecimalException.class, () -> {
+            deviceService.patchDevice(null, "x");
+        });
+        assertNotNull(exception);
+    }
+
+    @Test
+    public void testDeleteDeviceWithInvalidHexadecimal() {
+        Exception exception = assertThrows(InvalidHexadecimalException.class, () -> {
+            deviceService.deleteDevice("x");
+        });
+        assertNotNull(exception);
+    }
     
     private ModelMapper modelMapper() {
         PatchDeviceDtoToDeviceConverter patchDeviceDtoToDeviceConverter = new PatchDeviceDtoToDeviceConverter();
@@ -167,7 +200,7 @@ public class DeviceServiceTest {
         modelMapper.createTypeMap(PatchDeviceDto.class, Device.class).setConverter(patchDeviceDtoToDeviceConverter);
         return modelMapper;
     }
-    
+
     private DeviceDto newDeviceDto() {
         DeviceDto deviceDto = new DeviceDto();
         deviceDto.setName("name");
@@ -178,7 +211,7 @@ public class DeviceServiceTest {
     private Device mockDevice() {
         return mockDevice("name", "brand");
     }
-    
+
     private Device mockDevice(String name, String brand) {
         Device device = new Device();
         device.setName(name);

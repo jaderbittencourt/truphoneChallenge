@@ -2,6 +2,7 @@ package com.truphone.jaderbittencourt.truphoneChallenge.service;
 
 import com.truphone.jaderbittencourt.truphoneChallenge.dto.DeviceDto;
 import com.truphone.jaderbittencourt.truphoneChallenge.dto.PatchDeviceDto;
+import com.truphone.jaderbittencourt.truphoneChallenge.exception.InvalidHexadecimalException;
 import com.truphone.jaderbittencourt.truphoneChallenge.model.Device;
 import com.truphone.jaderbittencourt.truphoneChallenge.repository.DeviceRepository;
 import org.bson.types.ObjectId;
@@ -22,6 +23,7 @@ public class DeviceService {
     ModelMapper mapper;    
 
     public Optional<Device> getDeviceById(String id) {
+        validateHexadecimal(id);
         return deviceRepository.findActiveDeviceById(new ObjectId(id));
     }
     
@@ -40,6 +42,7 @@ public class DeviceService {
     }
     
     public Optional<Device> updateDevice(DeviceDto deviceDto, String id) {
+        validateHexadecimal(id);
         Optional<Device> optionalDevice = deviceRepository.findActiveDeviceById(new ObjectId(id));
         if (optionalDevice.isEmpty()) {
             return optionalDevice;
@@ -51,6 +54,7 @@ public class DeviceService {
     }
     
     public Optional<Device> patchDevice(PatchDeviceDto patchDeviceDto, String id) {
+        validateHexadecimal(id);
         Optional<Device> optionalDevice = deviceRepository.findActiveDeviceById(new ObjectId(id));
         if (optionalDevice.isEmpty()) {
             return optionalDevice;
@@ -62,6 +66,7 @@ public class DeviceService {
     }
     
     public boolean deleteDevice(String id) {
+        validateHexadecimal(id);
         Optional<Device> optionalDevice = deviceRepository.findActiveDeviceById(new ObjectId(id));
         if (optionalDevice.isEmpty()) {
             return false;
@@ -70,5 +75,11 @@ public class DeviceService {
         device.setDeleted(true);
         deviceRepository.save(device);
         return true;
+    }
+    
+    private void validateHexadecimal(String id) {
+        if (!ObjectId.isValid(id)) {
+            throw new InvalidHexadecimalException("Invalid hexadecimal provided: " + id);
+        }
     }
 }
