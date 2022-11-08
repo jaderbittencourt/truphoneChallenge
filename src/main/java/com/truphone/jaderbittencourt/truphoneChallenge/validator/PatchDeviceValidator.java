@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.Objects;
 
 public class PatchDeviceValidator implements ConstraintValidator<PatchDeviceAnnotation, PatchDeviceDto> {
+    
     public void initialize(PatchDeviceAnnotation constraintAnnotation) {
 
     }

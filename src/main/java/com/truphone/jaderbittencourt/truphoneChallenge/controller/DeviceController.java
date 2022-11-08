@@ -29,7 +29,7 @@ public class DeviceController {
     }
 
     @GetMapping("/brand/{brand}")
-    public ResponseEntity<List<Device>> searchDeviceByBrand(@PathVariable String brand) {
+    public ResponseEntity<List<Device>> getDeviceByBrand(@PathVariable String brand) {
         return new ResponseEntity<>(deviceService.gedDeviceByBrand(brand), HttpStatus.OK);
     }
 
